@@ -2,6 +2,7 @@ package com.bin.data.flows
 
 import com.bin.data.flows.exceptions.ConfigParamsException
 import com.bin.data.flows.file.ReadFile
+import com.bin.data.flows.json.JsonParser
 import com.bin.data.flows.params.ConfigParams
 import com.bin.data.flows.spark.SparkUtils
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -30,6 +31,13 @@ object FlowsApp extends App {
 
       val fileContent = ReadFile(config.configFile)
       println(fileContent)
+      val jp = new JsonParser(fileContent)
+      val strTime = jp.getStreamingTime()
+      val kafkaProps = jp.getKafka()
+
+      println(s"Streaming time $strTime")
+      //println(s"Kafka properties ${kafkaProps.topicConsumer}")
+//      kafkaProps.properties.foreach(r => println(s"${r._1}, ${r._2}"))
 
       val kafkaParams = Map[String, Object](
         "bootstrap.servers" -> "localhost:9092",
