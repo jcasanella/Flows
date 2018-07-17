@@ -4,7 +4,7 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
 
-case class KafkaConfig(topicConsumer: String, properties: Map[String, AnyVal])
+case class KafkaConfig(topicConsumer: String, properties: Map[String, String])
 class JsonParser(jsonToParse: String) {
 
   require(jsonToParse != null, "The json to parse is null")
@@ -13,25 +13,14 @@ class JsonParser(jsonToParse: String) {
 
   def getStreamingTime(): Long = (json \ "spark" \ "streamingTime").as[Long]
 
-  def getKafka(): String = {
-  //  val jsonKafka = (json \ "kafka").get
-   // implicit val kafkaConfig = Json.fromJson[KafkaConfig](jsonKafka)
-   // kafkaConfig.get
-   // jsonKafka.as[KafkaConfig]
-   // val kafkaRead = new Read
+  def getKafka(): KafkaConfig = {
 
-//    val jsonProp = (json \ "kafka" \ "properties").get
-//    implicit lazy val mapReads: Reads[Map[String, AnyVal]] = new Reads[Map[String, AnyVal]] {
-//      def reads(jv: JsValue): JsResult[Map[String, AnyVal]] =
-//        JsSuccess(jv.as[Map[String, AnyVal]].map{case (k, v) =>
-//          k -> v.asInstanceOf[AnyVal]
-//        })
-//    }
-//    val props = mapReads.reads(jsonProp).get
-    val topic = (json \ "kafka" \ "topicConsumer").as[String]
-
-    //KafkaConfig(topic, props)
-    topic
+    implicit val jsonKafka: Reads[KafkaConfig] = {
+      val props = (__ \ "properties").read[Map[String, String]]
+      ((__ \ "topicConsumer").read[String] and props)(KafkaConfig(_: String, _: Map[String, String]))
+    }
+    val kafka = (json \ "kafka").get
+    jsonKafka.reads(kafka).get
   }
 }
 

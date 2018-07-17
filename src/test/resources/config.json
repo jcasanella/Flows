@@ -1,14 +1,15 @@
 {
   "kafka" : {
     "topicConsumer" : "peopleDat",
-    "properties" : {
-      "bootstrap.servers" : "localhost:9092",
-      "key.deserializer" : "org.apache.kafka.common.serialization.StringDeserializer",
-      "value.deserializer" : "org.apache.kafka.common.serialization.StringDeserializer",
-      "group.id" : "consumer_kafka_6001",
-      "auto.offset.reset" : "earliest",
-      "enable.auto.commit" : false
-    }
+    "properties" :
+      {
+        "bootstrap.servers": "localhost:9092",
+        "key.deserializer": "org.apache.kafka.common.serialization.StringDeserializer",
+        "value.deserializer": "org.apache.kafka.common.serialization.StringDeserializer",
+        "group.id": "consumer_kafka_6001",
+        "auto.offset.reset": "earliest",
+        "enable.auto.commit": "false"
+      }
   },
   "spark" : {
     "streamingTime" : 3

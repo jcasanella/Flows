@@ -15,7 +15,7 @@ class JsonParserSpec extends FlatSpec with Matchers with BeforeAndAfter {
 
   "config.json" should "have content" in {
 
-    content.size should  be >= 0
+    content.size should be >= 0
   }
 
   "file" should "content property spark" in {
@@ -23,7 +23,7 @@ class JsonParserSpec extends FlatSpec with Matchers with BeforeAndAfter {
     val jp = new JsonParser(content)
     val streamingTime = jp.getStreamingTime()
 
-    streamingTime should === (3)
+    streamingTime should ===(3)
   }
 
   "file" should "content property kafka" in {
@@ -31,6 +31,8 @@ class JsonParserSpec extends FlatSpec with Matchers with BeforeAndAfter {
     val jp = new JsonParser(content)
     val kafkaConfig = jp.getKafka()
 
-    kafkaConfig should === ("peopleDat")
+    kafkaConfig.properties.foreach(row => println(s"${row._1} -> ${row._2}"))
+
+    kafkaConfig.topicConsumer should ===("peopleDat")
   }
 }
