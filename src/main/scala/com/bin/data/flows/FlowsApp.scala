@@ -2,7 +2,7 @@ package com.bin.data.flows
 
 import com.bin.data.flows.exceptions.ConfigParamsException
 import com.bin.data.flows.file.ReadFile
-import com.bin.data.flows.json.JsonParser
+import com.bin.data.flows.json.{JsonParser, KafkaConfig}
 import com.bin.data.flows.params.ConfigParams
 import com.bin.data.flows.spark.SparkUtils
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -16,43 +16,35 @@ import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
 
 object FlowsApp extends App {
 
+  def readJson(fileName: String): (Long, KafkaConfig) = {
+    val fileContent = ReadFile(fileName)
+    val jp = new JsonParser(fileContent)
+    val batchTime = jp.getStreamingTime()
+    val kafkaProps = jp.getKafka()
+
+    (batchTime, kafkaProps)
+  }
+
   val logger = LoggerFactory.getLogger(getClass.getName)
-  logger.info("This is a test")
+  logger.info("Starting the App")
 
-  implicit val session = SparkUtils.get(getClass.getName)
-  val ssc = new StreamingContext(
-    session.sparkContext,
-    Seconds(5)
-  )
-
-  println("Starting the App")
   ConfigParams.getParams(args) match {
     case Some(config) =>
 
-      val fileContent = ReadFile(config.configFile)
-      println(fileContent)
-      val jp = new JsonParser(fileContent)
-      val strTime = jp.getStreamingTime()
-      val kafkaProps = jp.getKafka()
+      implicit val session = SparkUtils.get(getClass.getName)
 
-      println(s"Streaming time $strTime")
-      //println(s"Kafka properties ${kafkaProps.topicConsumer}")
-//      kafkaProps.properties.foreach(r => println(s"${r._1}, ${r._2}"))
+      val jsonElems = readJson(config.configFile)
 
-      val kafkaParams = Map[String, Object](
-        "bootstrap.servers" -> "localhost:9092",
-        "key.deserializer" -> classOf[StringDeserializer],
-        "value.deserializer" -> classOf[StringDeserializer],
-        "group.id" -> "consumer_kafka_6001",
-        "auto.offset.reset" -> "earliest",
-        "enable.auto.commit" -> (false: java.lang.Boolean)
+      val ssc = new StreamingContext(
+        session.sparkContext,
+        Seconds(jsonElems._1)
       )
 
-      val topics = Array(config.topicName)
+      val topics = Array(jsonElems._2.topicConsumer)
       val stream = KafkaUtils.createDirectStream[String, String](
         ssc,
         PreferConsistent,
-        Subscribe[String, String](topics, kafkaParams)
+        Subscribe[String, String](topics, jsonElems._2.properties)
       )
 
       val feeds = stream.map(_.value())
@@ -62,7 +54,7 @@ object FlowsApp extends App {
           val df = rdd.toDS()
           df.show()
         } else {
-          println("Not empty")
+          println("Empty!!!!")
         }
       }
 

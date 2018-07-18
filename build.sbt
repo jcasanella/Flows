@@ -35,6 +35,12 @@ libraryDependencies ++= Seq(
   // Play json parser
   "com.typesafe.play" %% "play-json" % "2.6.7",
 
+  // kafka unit test https://github.com/chbatey/kafka-unit
+  "info.batey.kafka" % "kafka-unit" % "0.7",
+
+  // hBase unit test - minicluster
+  "org.apache.hbase" % "hbase-testing-util" % "2.0.0" % Test,
+
   "log4j" % "log4j" % "1.2.14"
 )
 

@@ -1,6 +1,6 @@
 {
   "kafka" : {
-    "topicConsumer" : "peopleDat",
+    "topicConsumer" : "peopleData",
     "properties" :
       {
         "bootstrap.servers": "localhost:9092",
