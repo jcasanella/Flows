@@ -6,6 +6,7 @@ import com.bin.data.flows.json.{JsonParser, KafkaConfig}
 import com.bin.data.flows.params.ConfigParams
 import com.bin.data.flows.spark.SparkUtils
 import org.apache.kafka.common.serialization.StringDeserializer
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.kafka010.KafkaUtils
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.slf4j.LoggerFactory
@@ -16,7 +17,7 @@ import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
 
 object FlowsApp extends App {
 
-  def readJson(fileName: String): (Long, KafkaConfig) = {
+  def readJson(fileName: String)(implicit session: SparkSession): (Long, KafkaConfig) = {
     val fileContent = ReadFile(fileName)
     val jp = new JsonParser(fileContent)
     val batchTime = jp.getStreamingTime()

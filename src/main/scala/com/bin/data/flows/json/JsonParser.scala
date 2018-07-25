@@ -1,5 +1,6 @@
 package com.bin.data.flows.json
 
+import com.bin.data.flows.exceptions.JsonParserException
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
@@ -11,8 +12,15 @@ class JsonParser(jsonToParse: String) {
 
   val json = Json.parse(jsonToParse)
 
-  def getStreamingTime(): Long = (json \ "spark" \ "streamingTime").as[Long]
+  def getStreamingTime(): Long = {
+    val resStreamTime = (json \ "spark" \ "streamingTime").validate[Long]
+    resStreamTime match {
+      case s: JsSuccess[Long] => s.get
+      case e: JsError => throw new JsonParserException(JsError.toJson(e).toString())
+    }
+  }
 
+  // TODO: Change method name
   def getKafka(): KafkaConfig = {
 
     implicit val jsonKafka: Reads[KafkaConfig] = {
@@ -20,7 +28,11 @@ class JsonParser(jsonToParse: String) {
       ((__ \ "topicConsumer").read[String] and props)(KafkaConfig(_: String, _: Map[String, String]))
     }
     val kafka = (json \ "kafka").get
-    jsonKafka.reads(kafka).get
+    val resKafkaConfig = jsonKafka.reads(kafka)
+    resKafkaConfig match {
+      case s: JsSuccess[KafkaConfig] => s.get
+      case e: JsError => throw new JsonParserException(JsError.toJson(e).toString())
+    }
   }
 }
 

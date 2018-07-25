@@ -1,38 +1,52 @@
 package com.bin.data.flows.json
 
+import com.bin.data.flows.exceptions.JsonParserException
 import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 
 import scala.io.Source
+import scala.util.Try
 
 class JsonParserSpec extends FlatSpec with Matchers with BeforeAndAfter {
 
-  var content: String = _
+  val configOk = "/config.json"
+  val configError = "/configError.json"
 
-  before {
-    val stream = getClass.getResourceAsStream("/config.json")
-    content = Source.fromInputStream(stream).mkString
+  private class ReadResource(fileName: String) {
+
+    val content = {
+      val stream = getClass.getResourceAsStream(fileName)
+      Try(Source.fromInputStream(stream).mkString)
+    }
+
+    val jsonContent = new JsonParser(content.get)
   }
 
-  "config.json" should "have content" in {
-
-    content.size should be >= 0
+  private object ReadResource {
+    def apply(fileName: String): ReadResource = {
+      new ReadResource(fileName)
+    }
   }
 
-  "file" should "content property spark" in {
-
-    val jp = new JsonParser(content)
-    val streamingTime = jp.getStreamingTime()
-
+  "config.json spark element" should "exist" in {
+    val readRes = ReadResource(configOk)
+    val streamingTime = readRes.jsonContent.getStreamingTime()
     streamingTime should ===(3)
   }
 
-  "file" should "content property kafka" in {
+  "configError.json spark element incorrect" should "throw the exception JsonParserException" in {
+    val readRes = ReadResource(configError)
+    an [JsonParserException] should be thrownBy readRes.jsonContent.getStreamingTime()
+  }
 
-    val jp = new JsonParser(content)
-    val kafkaConfig = jp.getKafka()
+  "configError.json kafka element incorrect" should "throw the exception JsonParserException" in {
+    val readRes = ReadResource(configError)
+    an [JsonParserException] should be thrownBy readRes.jsonContent.getKafka()
+  }
 
-    kafkaConfig.properties.foreach(row => println(s"${row._1} -> ${row._2}"))
-
-    kafkaConfig.topicConsumer should ===("peopleDat")
+  "config.json kafka element" should "exist" in {
+    val readRes = ReadResource(configOk)
+    val kafkaConfig = readRes.jsonContent.getKafka()
+    kafkaConfig.topicConsumer should ===("peopleData")
+    // TODO: Check map content
   }
 }
