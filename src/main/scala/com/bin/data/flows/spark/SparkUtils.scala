@@ -2,20 +2,12 @@ package com.bin.data.flows.spark
 
 import org.apache.spark.sql.SparkSession
 
-class SparkUtils(appName: String) {
+trait SparkUtils {
 
-  val sparkSession = SparkSession
+  implicit val sparkSession = SparkSession
     .builder()
-    .appName(appName)
+    .appName("FlowsApp")
     .enableHiveSupport()
     .getOrCreate()
-
-//  sparkSession.conf.set("", "")
 }
 
-object SparkUtils {
-
-  def get(appName: String): SparkSession = {
-    new SparkUtils(appName).sparkSession
-  }
-}

@@ -1,6 +1,5 @@
 {
   "kafka" : {
-    "topicConsumer" : "peopleData",
     "properties" :
       {
         "bootstrap.servers": "localhost:9092",
@@ -13,5 +12,10 @@
   },
   "spark" : {
     "streamingTime" : 3
+  },
+  "source" : {
+    "name" : "Read_Kafka",
+    "typeSource" : "kafka",
+    "topicConsumer" : "peopleData"
   }
 }
