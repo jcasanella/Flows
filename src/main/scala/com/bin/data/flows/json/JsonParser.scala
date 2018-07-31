@@ -25,13 +25,7 @@ class JsonParser(jsonToParse: String) {
 
   def getKafkaProps(): Map[String, String] = {
 
-//    implicit val jsonKafka: Reads[KafkaConfig] = {
-//      val props = (__ \ "properties").read[Map[String, String]]
-//      ((__ \ "topicConsumer").read[String] and props)(KafkaConfig(_: String, _: Map[String, String]))
-//    }
-//    val kafka = (json \ "kafka").get
-    val kafkaProps = (json \ "kafka").validate[Map[String, String]]
-//    val resKafkaConfig = jsonKafka.reads(kafka)
+    val kafkaProps = (json \ "kafka" \ "properties").validate[Map[String, String]]
     kafkaProps match {
       case s: JsSuccess[Map[String, String]] => s.get
       case e: JsError => throw new JsonParserException(JsError.toJson(e).toString())
@@ -40,22 +34,31 @@ class JsonParser(jsonToParse: String) {
 
   def getSource(): SourceProps = {
 
+    implicit val jsonKafka: Reads[SourceProps] = {
+      (
+        (__ \ "name").read[String] and
+          (__ \ "typeSource").read[String] and
+          (__ \ "topicConsumer").read[String]
+        ) (SourceProps(_: String, _: String, _: String))
+    }
+
     val sourceProps = (json \ "source").validate[SourceProps]
     sourceProps match {
       case s: JsSuccess[SourceProps] => s.get
-      case e: JsError =>  throw new JsonParserException(JsError.toJson(e).toString())
+      case e: JsError => throw new JsonParserException(JsError.toJson(e).toString())
     }
   }
 }
 
 case class Parameters(batchTime: Long, kafkaProps: Map[String, String], sourceProps: SourceProps)
+
 object Parameters {
 
   def apply(fileName: String)(implicit session: SparkSession): Parameters = {
 
     val fileContent = ReadFile(fileName)
     val jsonParser = new JsonParser(fileContent)
-    Parameters (
+    Parameters(
       batchTime = jsonParser.getStreamingTime,
       kafkaProps = jsonParser.getKafkaProps,
       sourceProps = jsonParser.getSource

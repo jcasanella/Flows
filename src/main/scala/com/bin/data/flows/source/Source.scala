@@ -8,7 +8,7 @@ import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
 import org.apache.spark.streaming.kafka010.KafkaUtils
 import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
 
-abstract class Source(name: String) {
+sealed abstract class Source(name: String) {
   def read()(implicit ssc: StreamingContext): DStream[String]
 }
 class KafkaSource(name: String, topicName: String, properties: Map[String, String]) extends Source(name: String) {

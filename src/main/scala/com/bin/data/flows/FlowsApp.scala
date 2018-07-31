@@ -18,7 +18,7 @@ object FlowsApp extends App with SparkUtils {
 
       val params = Parameters(config.configFile)
 
-      val ssc = new StreamingContext(
+      implicit val ssc = new StreamingContext(
         sparkSession.sparkContext,
         Seconds(params.batchTime)
       )
