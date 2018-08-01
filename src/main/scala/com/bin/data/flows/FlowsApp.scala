@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 object FlowsApp extends App with SparkUtils {
 
   val logger = LoggerFactory.getLogger(getClass.getName)
-  logger.info("Starting the App")
+  logger.info(">>> Starting the App")
 
   ConfigParams.getParams(args) match {
     case Some(config) =>
@@ -29,10 +29,12 @@ object FlowsApp extends App with SparkUtils {
       feeds.foreachRDD { rdd =>
         if (!rdd.isEmpty) {
           import sparkSession.implicits._
+          logger.info(">>> Msgs to process!!!")
           val df = rdd.toDS()
           df.show()
         } else {
           println("Empty!!!!")
+          logger.info(">>> Empty!!!")
         }
       }
 
