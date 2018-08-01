@@ -50,4 +50,17 @@ class JsonParserSpec extends FlatSpec with Matchers {
     kafkaConfig should contain ("auto.offset.reset" -> "earliest")
     kafkaConfig should contain ("enable.auto.commit" -> "false")
   }
+
+  "source properties" should "have defined name, typeSource and topicConsumer" in new ReadResource(configOk) {
+    val sourceConf = jsonContent.getSource()
+
+    // Checking the content of the source
+    sourceConf.topicConsumer should not be empty
+    sourceConf.name should not be empty
+    sourceConf.typeSource should not be empty
+  }
+
+  "source properties incorrect" should "throw JsonParserException" in new ReadResource(configError) {
+    an [JsonParserException] should be thrownBy jsonContent.getSource
+  }
 }

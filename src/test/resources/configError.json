@@ -15,7 +15,6 @@
   },
   "source" : {
     "name" : "Read_Kafka",
-    "typeSource" : "kafka",
-    "topicConsumer" : "peopleData"
+    "typeSource" : "kafka"
   }
 }

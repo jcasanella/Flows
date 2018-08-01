@@ -23,15 +23,6 @@ object FlowsApp extends App with SparkUtils {
         Seconds(params.batchTime)
       )
 
-//      val topics = Array(jsonElems._2.topicConsumer)
-//      val stream = KafkaUtils.createDirectStream[String, String](
-//        ssc,
-//        PreferConsistent,
-//        Subscribe[String, String](topics, jsonElems._2.properties)
-//      )
-//
-//      val feeds = stream.map(_.value())
-
       val source = Source(params)
       val feeds = source.read
 
